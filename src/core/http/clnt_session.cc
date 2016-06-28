@@ -309,7 +309,7 @@ int32_t clnt_session::run_state_machine(void *a_data, nconn::mode_t a_conn_mode)
                 }
 
                 l_s = l_nconn->nc_run_state_machine(a_conn_mode, l_in_q, l_out_q);
-                //NDBG_PRINT("%snc_run_state_machine%s l_s:  %d\n", ANSI_COLOR_FG_GREEN, ANSI_COLOR_OFF, l_status);
+                //NDBG_PRINT("%snc_run_state_machine%s l_s:  %d\n", ANSI_COLOR_FG_GREEN, ANSI_COLOR_OFF, l_s);
                 if(l_s > 0)
                 {
                         if(a_conn_mode == nconn::NC_MODE_READ)
@@ -391,6 +391,12 @@ int32_t clnt_session::run_state_machine(void *a_data, nconn::mode_t a_conn_mode)
                                 {
                                         l_cs->m_in_q->reset_write();
                                 }
+                        }
+
+                        if((l_cs->m_out_q && (l_cs->m_out_q->read_avail())))
+                        {
+                                a_conn_mode = nconn::NC_MODE_WRITE;
+                                continue;
                         }
                 }
                 // ---------------------------------------------------
