@@ -1139,14 +1139,14 @@ void *t_srvr::t_run(void *a_nothing)
 
                 }
 
-                if(m_clnt_session_writeable_data)
+                void *l_data = dequeue_clnt_session_writeable();
+                if(l_data)
                 {
-                        l_s = clnt_session::evr_fd_writeable_cb(m_clnt_session_writeable_data);
+                        l_s = clnt_session::evr_fd_writeable_cb(l_data);
                         if(l_s != HLX_STATUS_OK)
                         {
                                 // TODO log failure
                         }
-                        m_clnt_session_writeable_data = NULL;
                 }
 
                 // Subrequests
@@ -1422,7 +1422,7 @@ nbq *t_srvr::get_nbq(void)
         l_nbq = m_nbq_pool.get_free();
         if(!l_nbq)
         {
-                l_nbq = new nbq(4096);
+                l_nbq = new nbq(1*4096);
                 m_nbq_pool.add(l_nbq);
                 l_new = true;
         }

@@ -200,7 +200,7 @@ int32_t clnt_session::teardown(t_srvr *a_t_srvr, clnt_session *a_cs, nconn *a_nc
 //: ----------------------------------------------------------------------------
 int32_t clnt_session::run_state_machine(void *a_data, nconn::mode_t a_conn_mode)
 {
-        //NDBG_PRINT("RUN a_conn_mode: %d a_data: %p\n", a_conn_mode, a_data);
+        //NDBG_PRINT("%sRUN%s a_conn_mode: %d a_data: %p\n", ANSI_COLOR_FG_YELLOW, ANSI_COLOR_OFF, a_conn_mode, a_data);
         CHECK_FOR_NULL_ERROR(a_data);
         nconn* l_nconn = static_cast<nconn*>(a_data);
         CHECK_FOR_NULL_ERROR(l_nconn->get_ctx());
@@ -261,6 +261,7 @@ int32_t clnt_session::run_state_machine(void *a_data, nconn::mode_t a_conn_mode)
         // -------------------------------------------------
         // in/out q's
         // -------------------------------------------------
+conn_loop:
         nbq *l_in_q = NULL;
         nbq *l_out_q = NULL;
         if(l_cs)
@@ -392,12 +393,6 @@ int32_t clnt_session::run_state_machine(void *a_data, nconn::mode_t a_conn_mode)
                                         l_cs->m_in_q->reset_write();
                                 }
                         }
-
-                        if((l_cs->m_out_q && (l_cs->m_out_q->read_avail())))
-                        {
-                                a_conn_mode = nconn::NC_MODE_WRITE;
-                                continue;
-                        }
                 }
                 // ---------------------------------------------------
                 // WRITEABLE
@@ -504,7 +499,14 @@ check_conn_status:
                 }
         } while((l_s != nconn::NC_STATUS_AGAIN) &&
                  (l_t_srvr && l_t_srvr->is_running()));
+
 done:
+        if((a_conn_mode == nconn::NC_MODE_READ) && (l_t_srvr->dequeue_clnt_session_writeable()))
+        {
+                a_conn_mode = nconn::NC_MODE_WRITE;
+                goto conn_loop;
+        }
+
         // Add idle timeout
         if(l_t_srvr &&
            l_cs &&
