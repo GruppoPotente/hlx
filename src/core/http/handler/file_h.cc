@@ -196,11 +196,11 @@ h_resp_t file_h::get_file(clnt_session &a_clnt_session,
                 nbq_write_header(l_q, "Connection", "close");
         }
         l_q.write("\r\n", strlen("\r\n"));
-        // Read up to 32k
+        // Read up to 4k
         uint32_t l_read = 4096;
-        if((4096) - l_q.read_avail() > 0)
+        if(l_read - l_q.read_avail() > 0)
         {
-                l_read = (4096) - l_q.read_avail();
+                l_read = l_read - l_q.read_avail();
         }
         if(l_fs->fssize() < l_read)
         {
