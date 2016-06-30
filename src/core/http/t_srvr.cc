@@ -1422,7 +1422,7 @@ nbq *t_srvr::get_nbq(void)
         l_nbq = m_nbq_pool.get_free();
         if(!l_nbq)
         {
-                l_nbq = new nbq(1*4096);
+                l_nbq = new nbq(4096);
                 m_nbq_pool.add(l_nbq);
                 l_new = true;
         }
